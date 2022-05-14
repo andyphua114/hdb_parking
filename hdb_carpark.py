@@ -6,6 +6,7 @@ import streamlit as st
 import streamlit.components.v1 as components
 import pydeck as pdk
 import numpy as np
+import plotly.graph_objects as go
 
 
 hdb_carpark = pd.read_csv('hdb-carpark-lat-lon.csv')
@@ -24,52 +25,71 @@ else:
 
 hdb_carpark_final = hdb_carpark_bytype.copy()
 
-postal_code = st.text_input('Key in postal code', value = '')
+input_lat = 1.368112
+input_lon = 103.804584
+input_zoom = 10.5
 
-input_lat = 1.365797
-input_lon = 103.813517
-input_zoom = 11
-if postal_code == '733894':
-    input_lat = 1.43563830011225
-    input_lon = 103.789459334951
-    input_zoom = 16
+postal_code = st.text_input('Key in postal code/address', value = '')
+
+if postal_code != '':
+    url = 'https://developers.onemap.sg/commonapi/search?searchVal=' + postal_code + '&returnGeom=Y&getAddrDetails=Y'
+    response = requests.get(url)
+    json_data = response.json()
+    input_lat = float(json_data['results'][0]['LATITUDE'])
+    input_lon = float(json_data['results'][0]['LONGITUDE'])
+    input_zoom = 15
 
 #st.map(hdb_carpark)
 destination_df = pd.DataFrame({'lat': [input_lat], 'lon':[input_lon]})
 
 #reference to these documentations
-#https://deck.gl/docs/api-reference/layers
-#https://deckgl.readthedocs.io/en/latest/gallery/scatterplot_layer.html
-#https://deckgl.readthedocs.io/en/latest/tooltip.html
-#https://deckgl.readthedocs.io/en/latest/gallery/icon_layer.html
-st.pydeck_chart(pdk.Deck(
-    map_style = 'mapbox://styles/mapbox/streets-v11',
-    initial_view_state=pdk.ViewState(
-        latitude=input_lat,
-        longitude=input_lon,
-        zoom=input_zoom,
-        pitch=0,
-    ),
-    layers = [
-        pdk.Layer(
-            'ScatterplotLayer',
-            data = hdb_carpark_final,
-            pickable = True,
-            get_position = '[lon, lat]',
-            get_color = '[200, 30, 0, 160]',
-            get_radius = 15
-        ),
-        pdk.Layer(
-            'ScatterplotLayer',
-            data = destination_df,
-            pickable = True,
-            get_position = '[lon, lat]',
-            get_color = '[0, 44, 199, 160]',
-            get_radius = 15   
-        )           
-    ],
-    tooltip = {
-        'text': "{car_park_type}\n{address}",
+#https://docs.streamlit.io/library/api-reference/charts/st.plotly_chart
+#https://plotly.com/python/scattermapbox/
 
-    }    
+fig = go.Figure(go.Scattermapbox(
+    lat = hdb_carpark_final['lat'],
+    lon = hdb_carpark_final['lon'],
+    mode = 'markers',
+    marker = dict(
+        size = 8,
+        color='rgba(203, 29, 23, 0.8)',
+        opacity = 0.5),
+    text = hdb_carpark_final['address'],
+    hovertemplate = '%{text}<extra></extra>'
 ))
+
+
+if (input_lat != 1.368112) and (input_lon != 103.804584):
+    fig.add_trace(go.Scattermapbox(
+        lat = [input_lat],
+        lon = [input_lon],
+        mode = 'markers',
+        marker = dict(
+            symbol = 'circle',
+            size = 10,
+            color = 'rgba(30, 97, 238, 0.8)'),
+        hovertemplate = 'Your Destination<extra></extra>'
+        )
+    )
+
+fig.update_layout(
+    margin=dict(t=0, b=0, l=0, r=0),
+    autosize = False,
+    width = 700,
+    height = 500,
+    showlegend = False,
+    hovermode = 'closest',
+    mapbox_style="carto-positron",
+    mapbox = dict(
+        bearing = 0,
+        center = dict(
+            lat = input_lat,
+            lon = input_lon),
+        pitch = 0,
+        zoom = input_zoom
+    )
+    )
+
+
+
+st.plotly_chart(fig, use_container_width = True)
