@@ -107,8 +107,9 @@ fig = go.Figure(go.Scattermapbox(
         size = 8,
         color='rgba(203, 29, 23, 0.8)',
         opacity = 0.5),
+    hovertext = hdb_carpark_final['car_park_type'],
     text = hdb_carpark_final['address'],
-    hovertemplate = '%{text}<extra></extra>'
+    hovertemplate = '%{hovertext}<br>%{text}<extra></extra>'
 ))
 
 
