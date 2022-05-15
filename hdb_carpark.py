@@ -14,14 +14,24 @@ hdb_carpark = pd.read_csv('hdb-carpark-lat-lon.csv')
 type_of_carpark = list(hdb_carpark['car_park_type'].unique())
 type_of_carpark.insert(0, "ALL")
 
-type_options = st.multiselect(
-    'Choose the type of carpark',
-    type_of_carpark)
+short_term = list(hdb_carpark['short_term_parking'].unique())
+short_term.insert(0, "ALL")
 
-if type_options == ['ALL']:
+with st.sidebar:
+    type_options = st.multiselect(
+        'Choose the type of carpark',
+        type_of_carpark
+        )
+
+    short_term_options = st.multiselect(
+        'Choose the type of short term parking',
+        short_term)
+
+if (type_options == ['ALL']) and (short_term_options == ['ALL']):
     hdb_carpark_bytype = hdb_carpark
 else:
     hdb_carpark_bytype = hdb_carpark[hdb_carpark['car_park_type'].isin(type_options)]
+    hdb_carpark_bytype = hdb_carpark[hdb_carpark['short_term_parking'].isin(short_term_options)]
 
 hdb_carpark_final = hdb_carpark_bytype.copy()
 
@@ -35,9 +45,11 @@ if postal_code != '':
     url = 'https://developers.onemap.sg/commonapi/search?searchVal=' + postal_code + '&returnGeom=Y&getAddrDetails=Y'
     response = requests.get(url)
     json_data = response.json()
-    input_lat = float(json_data['results'][0]['LATITUDE'])
-    input_lon = float(json_data['results'][0]['LONGITUDE'])
-    input_zoom = 15
+    if json_data['found'] > 0:
+        input_lat = float(json_data['results'][0]['LATITUDE'])
+        input_lon = float(json_data['results'][0]['LONGITUDE'])
+        input_add = json_data['results'][0]['ADDRESS']
+        input_zoom = 15
 
 #st.map(hdb_carpark)
 destination_df = pd.DataFrame({'lat': [input_lat], 'lon':[input_lon]})
@@ -68,7 +80,8 @@ if (input_lat != 1.368112) and (input_lon != 103.804584):
             symbol = 'circle',
             size = 10,
             color = 'rgba(30, 97, 238, 0.8)'),
-        hovertemplate = 'Your Destination<extra></extra>'
+        text = [input_add],
+        hovertemplate = 'YOUR DESTINATION:<br>' + '%{text}<extra></extra>'
         )
     )
 
