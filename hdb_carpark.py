@@ -125,23 +125,41 @@ if (input_lat != 1.368112) and (input_lon != 103.804584):
         )
     )
 
-fig.update_layout(
-    margin=dict(t=0, b=0, l=0, r=0),
-    autosize = False,
-    width = 700,
-    height = 500,
-    showlegend = False,
-    hovermode = 'closest',
-    mapbox_style="carto-positron",
-    mapbox = dict(
-        bearing = 0,
-        center = dict(
-            lat = input_lat,
-            lon = input_lon),
-        pitch = 0,
-        zoom = input_zoom
-    )
-    )
+    fig.update_layout(
+        margin=dict(t=0, b=0, l=0, r=0),
+        autosize = False,
+        width = 700,
+        height = 500,
+        showlegend = False,
+        hovermode = 'closest',
+        mapbox_style="carto-positron",
+        mapbox = dict(
+            bearing = 0,
+            center = dict(
+                lat = input_lat,
+                lon = input_lon),
+            pitch = 0,
+            zoom = input_zoom
+        )
+        )
+else:
+    fig.update_layout(
+        margin=dict(t=0, b=0, l=0, r=0),
+        autosize = False,
+        width = 700,
+        height = 500,
+        showlegend = False,
+        hovermode = 'closest',
+        mapbox_style="carto-positron",
+        mapbox = dict(
+            bearing = 0,
+            center = dict(
+                lat = 1.368112,
+                lon = 103.804584),
+            pitch = 0,
+            zoom = 10.5
+        )
+        )    
 
 
 
