@@ -7,33 +7,73 @@ import streamlit.components.v1 as components
 import pydeck as pdk
 import numpy as np
 import plotly.graph_objects as go
+from itertools import compress
 
 
 hdb_carpark = pd.read_csv('hdb-carpark-lat-lon.csv')
 
-type_of_carpark = list(hdb_carpark['car_park_type'].unique())
-type_of_carpark.insert(0, "ALL")
+type_of_carpark = list(np.sort(hdb_carpark['car_park_type'].unique()))
 
-short_term = list(hdb_carpark['short_term_parking'].unique())
-short_term.insert(0, "ALL")
+short_term = list(np.sort(hdb_carpark['short_term_parking'].unique()))
 
 with st.sidebar:
-    type_options = st.multiselect(
-        'Choose the type of carpark',
-        type_of_carpark
-        )
 
-    short_term_options = st.multiselect(
-        'Choose the type of short term parking',
-        short_term)
+    #create checkbox for selection of type of carpark
+    st.subheader('Choose Type of Carpark')
 
-if (type_options == ['ALL']) and (short_term_options == ['ALL']):
-    hdb_carpark_bytype = hdb_carpark
-else:
-    hdb_carpark_bytype = hdb_carpark[hdb_carpark['car_park_type'].isin(type_options)]
-    hdb_carpark_bytype = hdb_carpark[hdb_carpark['short_term_parking'].isin(short_term_options)]
+    col1, col2 = st.columns(2)
 
-hdb_carpark_final = hdb_carpark_bytype.copy()
+    with col1:
+        surface = st.checkbox('SURFACE', True)
+    with col2:
+        ms = st.checkbox('MULTI-STOREY', True)
+
+    col1, col2 = st.columns(2)
+
+    with col1:
+        surfacemulti = st.checkbox('SURFACE/MULTI-STOREY', True)
+    with col2:
+        basement = st.checkbox('BASEMENT', True)
+
+    col1, col2 = st.columns(2)
+
+    with col1:
+        covered = st.checkbox('COVERED', True)
+    with col2:
+        mech = st.checkbox('MECHANISED', True)
+
+    #line break between sections
+    st.subheader('')
+
+    #create checkbox for selection of short term parking
+    st.subheader('Choose Short Term Parking')
+    st.caption('Refers to parking in an HDB car park without a valid season parking.')
+
+    col1, col2, = st.columns(2)
+
+    with col1:
+        show_wd = st.checkbox('Whole Day', True)
+    with col2:
+        show_no = st.checkbox('No', True)
+
+    col1, col2 = st.columns(2)
+    with col1:
+        show_77 = st.checkbox('7am-7pm', True)  
+    with col2:
+        show_710 = st.checkbox('7am-10.30pm', True)
+
+#filtering results based on selection
+
+type_toggle = [basement, covered, mech, mech, ms, surface, surfacemulti]
+type_options  = list(compress(type_of_carpark, type_toggle))
+
+short_term_toggle = [show_710, show_77, show_no, show_wd]
+short_term_options  = list(compress( short_term, short_term_toggle))
+
+hdb_carpark_1 = hdb_carpark[hdb_carpark['car_park_type'].isin(type_options)]
+hdb_carpark_2 = hdb_carpark_1[hdb_carpark_1['short_term_parking'].isin(short_term_options)]
+
+hdb_carpark_final = hdb_carpark_2.copy()
 
 input_lat = 1.368112
 input_lon = 103.804584
