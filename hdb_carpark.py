@@ -9,12 +9,13 @@ import numpy as np
 import plotly.graph_objects as go
 from itertools import compress
 
-
 hdb_carpark = pd.read_csv('hdb-carpark-lat-lon.csv')
 
 type_of_carpark = list(np.sort(hdb_carpark['car_park_type'].unique()))
 
 short_term = list(np.sort(hdb_carpark['short_term_parking'].unique()))
+
+st.title('HDB Carpark Search')
 
 with st.sidebar:
 
@@ -24,23 +25,23 @@ with st.sidebar:
     col1, col2 = st.columns(2)
 
     with col1:
-        surface = st.checkbox('SURFACE', True)
+        surface = st.checkbox('Surface', True)
     with col2:
-        ms = st.checkbox('MULTI-STOREY', True)
+        ms = st.checkbox('Multi-Storey', True)
 
     col1, col2 = st.columns(2)
 
     with col1:
-        surfacemulti = st.checkbox('SURFACE/MULTI-STOREY', True)
+        surfacemulti = st.checkbox('Surface/Multi-Storey', True)
     with col2:
-        basement = st.checkbox('BASEMENT', True)
+        basement = st.checkbox('Basement', True)
 
     col1, col2 = st.columns(2)
 
     with col1:
-        covered = st.checkbox('COVERED', True)
+        covered = st.checkbox('Covered', True)
     with col2:
-        mech = st.checkbox('MECHANISED', True)
+        mech = st.checkbox('Mechanised', True)
 
     #line break between sections
     st.subheader('')
